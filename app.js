@@ -1,6 +1,5 @@
 const CONFIG = {
-  // Paste the deployed Google Apps Script /exec URL here after deployment.
-  API_URL: '',
+  API_URL: 'https://script.google.com/macros/s/AKfycbxB_aj2mWDx5p5W5fn9kWaKeK5fsQm9QRrR-mgfbD1io3TNS133o2XMAkR_pS_MQH4/exec',
   SEARCH_DELAY_MS: 180,
   MIN_QUERY_LENGTH: 2,
   MAX_RESULTS: 30,

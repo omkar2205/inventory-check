@@ -1,0 +1,47 @@
+.batch-only.selected {
+  background: #fff0ee;
+  color: #b42318;
+}
+
+.review-selection-list {
+  gap: 0;
+}
+
+.review-selection-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 13px 0;
+}
+
+.review-person {
+  min-width: 0;
+  flex: 1;
+}
+
+.review-person strong {
+  display: block;
+  line-height: 1.25;
+}
+
+.review-person span {
+  display: block;
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.review-remove {
+  flex: 0 0 auto;
+  min-height: 42px;
+  border: 0;
+  border-radius: 12px;
+  background: #fff0ee;
+  color: #b42318;
+  padding: 0 13px;
+  font-size: 12px;
+  font-weight: 900;
+  cursor: pointer;
+}

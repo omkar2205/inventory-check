@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#f7f7f5" />
+  <title>Event Distribution</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div>
+        <div class="eyebrow">EVENT DISTRIBUTION</div>
+        <h1>Find employee</h1>
+      </div>
+      <button id="statsPill" class="stats-pill" type="button" aria-label="Distribution statistics">
+        <strong id="distributedCount">0</strong><span>/</span><span id="totalCount">0</span>
+      </button>
+    </header>
+
+    <main>
+      <section class="search-panel">
+        <label class="search-box" for="searchInput">
+          <span class="search-icon" aria-hidden="true">⌕</span>
+          <input id="searchInput" autocomplete="off" autocapitalize="words" spellcheck="false"
+                 placeholder="Name, employee ID, team or manager" />
+          <button id="clearSearch" class="icon-button hidden" type="button" aria-label="Clear search">×</button>
+        </label>
+
+        <div class="filter-row" aria-label="Employee filters">
+          <button class="filter-chip" data-filter="brand" type="button">Brand</button>
+          <button class="filter-chip" data-filter="team" type="button">Team</button>
+          <button class="filter-chip" data-filter="manager" type="button">Manager</button>
+        </div>
+
+        <div id="activeFilters" class="active-filters hidden"></div>
+      </section>
+
+      <section id="statusArea" class="status-area" aria-live="polite"></section>
+      <section id="results" class="results" aria-label="Employee search results"></section>
+
+      <section id="emptyState" class="empty-state">
+        <div class="empty-mark">✓</div>
+        <h2>Ready for the next employee</h2>
+        <p>Search by name, employee ID, brand, team or manager.</p>
+      </section>
+    </main>
+  </div>
+
+  <div id="selectionTray" class="selection-tray hidden">
+    <button id="selectionSummary" class="selection-summary" type="button">
+      <span><strong id="selectedCount">0</strong> selected</span>
+      <span class="muted">Review</span>
+    </button>
+    <button id="giveSelectedButton" class="primary-action" type="button">Give orders</button>
+  </div>
+
+  <div id="sheet" class="sheet-backdrop hidden" role="dialog" aria-modal="true">
+    <div class="bottom-sheet">
+      <div class="sheet-handle"></div>
+      <div class="sheet-header">
+        <div>
+          <div class="eyebrow" id="sheetEyebrow">FILTER</div>
+          <h2 id="sheetTitle">Choose</h2>
+        </div>
+        <button id="closeSheet" class="icon-button" type="button" aria-label="Close">×</button>
+      </div>
+      <div id="sheetBody" class="sheet-body"></div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>

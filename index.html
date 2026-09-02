@@ -11,6 +11,18 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
+  <div id="accessGate" class="access-gate">
+    <form id="accessForm" class="access-card" autocomplete="off">
+      <div class="access-mark">✓</div>
+      <div class="eyebrow">EVENT DISTRIBUTION</div>
+      <h1>Ready to serve</h1>
+      <p>Enter the 6-digit event PIN on this device.</p>
+      <input id="pinInput" class="pin-input" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="one-time-code" aria-label="Event PIN" placeholder="••••••" />
+      <div id="gateError" class="gate-error hidden" role="alert"></div>
+      <button id="unlockButton" class="unlock-button" type="submit">Open distribution</button>
+    </form>
+  </div>
+
   <div class="app-shell">
     <header class="topbar">
       <div>
@@ -27,7 +39,7 @@
         <label class="search-box" for="searchInput">
           <span class="search-icon" aria-hidden="true">⌕</span>
           <input id="searchInput" autocomplete="off" autocapitalize="words" spellcheck="false"
-                 placeholder="Name, employee ID, team or manager" />
+                 placeholder="Name, ID, team or manager" />
           <button id="clearSearch" class="icon-button hidden" type="button" aria-label="Clear search">×</button>
         </label>
 
@@ -35,6 +47,7 @@
           <button class="filter-chip" data-filter="brand" type="button">Brand</button>
           <button class="filter-chip" data-filter="team" type="button">Team</button>
           <button class="filter-chip" data-filter="manager" type="button">Manager</button>
+          <button class="filter-chip" data-filter="l2Manager" type="button">L2 Manager</button>
         </div>
 
         <div id="activeFilters" class="active-filters hidden"></div>
@@ -46,7 +59,7 @@
       <section id="emptyState" class="empty-state">
         <div class="empty-mark">✓</div>
         <h2>Ready for the next employee</h2>
-        <p>Search by name, employee ID, brand, team or manager.</p>
+        <p>Search by name, ID, brand, team, L1 or L2 manager.</p>
       </section>
     </main>
   </div>
@@ -54,9 +67,9 @@
   <div id="selectionTray" class="selection-tray hidden">
     <button id="selectionSummary" class="selection-summary" type="button">
       <span><strong id="selectedCount">0</strong> selected</span>
-      <span class="muted">Review</span>
+      <span class="muted">Proxy / group collection</span>
     </button>
-    <button id="giveSelectedButton" class="primary-action" type="button">Give orders</button>
+    <button id="giveSelectedButton" class="primary-action" type="button">Review</button>
   </div>
 
   <div id="sheet" class="sheet-backdrop hidden" role="dialog" aria-modal="true">

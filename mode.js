@@ -27,7 +27,7 @@ function updateModeUI() {
   modeEls.multiple.setAttribute('aria-pressed', String(multiple));
 
   modeEls.hint.textContent = multiple
-    ? 'Add each employee. The search clears automatically after every ADD.'
+    ? 'Add each employee. Review anytime to remove someone before giving the orders.'
     : 'Find one employee and tap GIVE.';
 
   modeEls.emptyText.textContent = multiple
@@ -78,7 +78,7 @@ renderResults = function renderResultsByMode() {
     if (collected) {
       actionHtml = '<button class="given-button" type="button" disabled>GIVEN</button>';
     } else if (multiple) {
-      actionHtml = `<button class="batch-only ${selected ? 'selected' : ''}" type="button" data-select="${escapeHtml(employee.code)}" ${busy ? 'disabled' : ''}>${busy ? 'SAVING' : selected ? '✓ ADDED' : 'ADD'}</button>`;
+      actionHtml = `<button class="batch-only ${selected ? 'selected' : ''}" type="button" data-select="${escapeHtml(employee.code)}" ${busy ? 'disabled' : ''}>${busy ? 'SAVING' : selected ? 'REMOVE' : 'ADD'}</button>`;
     } else {
       actionHtml = `<button class="quick-give" type="button" data-quick-give="${escapeHtml(employee.code)}" ${busy ? 'disabled' : ''}>${busy ? 'SAVING' : 'GIVE'}</button>`;
     }
@@ -119,6 +119,10 @@ toggleEmployee = function toggleEmployeeForMultiple(code) {
     resetSearch();
     showToast(`${state.selected.size} ${state.selected.size === 1 ? 'order' : 'orders'} selected`);
     setTimeout(() => els.searchInput.focus(), 50);
+  } else if (wasSelected && !state.selected.has(code)) {
+    showToast('Removed from multiple order');
+    renderSelectionTray();
+    renderResults();
   }
 };
 
@@ -131,21 +135,36 @@ renderSelectionTray = function renderMultipleSelectionTray() {
   updateMultipleCount();
 };
 
-openReviewSheet = function openMultipleReviewSheet() {
-  if (state.collectionMode !== 'multiple') return;
+function renderMultipleReviewContents(preferredCollectorCode = '') {
   const employees = [...state.selected.values()].filter(employee => !employee.collected);
-  if (!employees.length) return;
 
-  const collectorOptions = employees.map((employee, index) =>
-    `<option value="${escapeHtml(employee.code)}" ${index === 0 ? 'selected' : ''}>${escapeHtml(employee.name)} (${escapeHtml(employee.code)})</option>`
+  if (!employees.length) {
+    closeSheet();
+    renderSelectionTray();
+    showToast('No orders selected');
+    return;
+  }
+
+  const collectorCode = employees.some(employee => employee.code === preferredCollectorCode)
+    ? preferredCollectorCode
+    : employees[0].code;
+
+  els.sheetEyebrow.textContent = 'MULTIPLE ORDERS';
+  els.sheetTitle.textContent = `${employees.length} ${employees.length === 1 ? 'order' : 'orders'} selected`;
+
+  const collectorOptions = employees.map(employee =>
+    `<option value="${escapeHtml(employee.code)}" ${employee.code === collectorCode ? 'selected' : ''}>${escapeHtml(employee.name)} (${escapeHtml(employee.code)})</option>`
   ).join('');
 
-  openSheet('MULTIPLE ORDERS', `${employees.length} ${employees.length === 1 ? 'order' : 'orders'} selected`, `
-    <div class="selection-list">
+  els.sheetBody.innerHTML = `
+    <div class="selection-list review-selection-list">
       ${employees.map(employee => `
-        <div class="selection-item">
-          <strong>${escapeHtml(employee.name)}</strong>
-          <span>${escapeHtml(employee.code)} · ${escapeHtml(employee.brand || '')}${employee.team ? ` · ${escapeHtml(employee.team)}` : ''}</span>
+        <div class="selection-item review-selection-item">
+          <div class="review-person">
+            <strong>${escapeHtml(employee.name)}</strong>
+            <span>${escapeHtml(employee.code)} · ${escapeHtml(employee.brand || '')}${employee.team ? ` · ${escapeHtml(employee.team)}` : ''}</span>
+          </div>
+          <button class="review-remove" type="button" data-remove-selected="${escapeHtml(employee.code)}">Remove</button>
         </div>`).join('')}
     </div>
     <div class="collector-block">
@@ -154,12 +173,33 @@ openReviewSheet = function openMultipleReviewSheet() {
       <select id="collectorSelect" class="collector-select">${collectorOptions}</select>
     </div>
     <button id="confirmGiveButton" class="confirm-button" type="button">${employees.length === 1 ? 'Give 1 order' : `Give ${employees.length} orders`}</button>
-  `);
+  `;
+
+  els.sheetBody.querySelectorAll('[data-remove-selected]').forEach(button => {
+    button.addEventListener('click', () => {
+      const currentCollector = document.getElementById('collectorSelect')?.value || '';
+      const code = button.dataset.removeSelected;
+      state.selected.delete(code);
+      updateMultipleCount();
+      renderSelectionTray();
+      renderResults();
+      showToast('Removed from multiple order');
+      renderMultipleReviewContents(currentCollector === code ? '' : currentCollector);
+    });
+  });
 
   document.getElementById('confirmGiveButton').addEventListener('click', async () => {
-    const collectorCode = document.getElementById('collectorSelect')?.value || employees[0].code;
-    await submitGive(employees.map(employee => employee.code), collectorCode, { quick: false });
+    const currentEmployees = [...state.selected.values()].filter(employee => !employee.collected);
+    if (!currentEmployees.length) return;
+    const selectedCollector = document.getElementById('collectorSelect')?.value || currentEmployees[0].code;
+    await submitGive(currentEmployees.map(employee => employee.code), selectedCollector, { quick: false });
   });
+}
+
+openReviewSheet = function openMultipleReviewSheet() {
+  if (state.collectionMode !== 'multiple' || !state.selected.size) return;
+  openSheet('MULTIPLE ORDERS', 'Review orders', '');
+  renderMultipleReviewContents();
 };
 
 els.giveSelectedButton.addEventListener('click', openReviewSheet);

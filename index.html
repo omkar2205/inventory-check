@@ -9,6 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="mode.css" />
 </head>
 <body>
   <div id="accessGate" class="access-gate">
@@ -35,6 +36,18 @@
     </header>
 
     <main>
+      <section class="collection-mode" aria-label="Collection type">
+        <button id="singleModeButton" class="mode-button active" type="button" aria-pressed="true">
+          <span class="mode-icon">1</span>
+          <span><strong>Single order</strong><small>One employee</small></span>
+        </button>
+        <button id="multipleModeButton" class="mode-button" type="button" aria-pressed="false">
+          <span class="mode-icon">+</span>
+          <span><strong>Multiple orders</strong><small>Collect for others</small></span>
+        </button>
+      </section>
+      <p id="modeHint" class="mode-hint">Find one employee and tap GIVE.</p>
+
       <section class="search-panel">
         <label class="search-box" for="searchInput">
           <span class="search-icon" aria-hidden="true">⌕</span>
@@ -59,17 +72,17 @@
       <section id="emptyState" class="empty-state">
         <div class="empty-mark">✓</div>
         <h2>Ready for the next employee</h2>
-        <p>Search by name, ID, brand, team, L1 or L2 manager.</p>
+        <p id="emptyStateText">Search by name, ID, brand, team, L1 or L2 manager.</p>
       </section>
     </main>
   </div>
 
   <div id="selectionTray" class="selection-tray hidden">
     <button id="selectionSummary" class="selection-summary" type="button">
-      <span><strong id="selectedCount">0</strong> selected</span>
-      <span class="muted">Proxy / group collection</span>
+      <span><strong id="selectedCount">0</strong> orders selected</span>
+      <span class="muted">Multiple collection</span>
     </button>
-    <button id="giveSelectedButton" class="primary-action" type="button">Review</button>
+    <button id="giveSelectedButton" class="primary-action" type="button">Review & give</button>
   </div>
 
   <div id="sheet" class="sheet-backdrop hidden" role="dialog" aria-modal="true">
@@ -89,5 +102,6 @@
   <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
 
   <script src="app.js"></script>
+  <script src="mode.js"></script>
 </body>
 </html>

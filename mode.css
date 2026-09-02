@@ -1,0 +1,132 @@
+.collection-mode {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px;
+  margin-bottom: 8px;
+}
+
+.mode-button {
+  min-height: 68px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--surface);
+  color: var(--text);
+  padding: 10px 12px;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(0,0,0,.025);
+}
+
+.mode-button.active {
+  border-color: #161616;
+  background: #161616;
+  color: #fff;
+  box-shadow: 0 8px 24px rgba(0,0,0,.13);
+}
+
+.mode-icon {
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: #f0f0ed;
+  color: #222;
+  font-size: 18px;
+  font-weight: 900;
+}
+
+.mode-button.active .mode-icon {
+  background: rgba(255,255,255,.15);
+  color: #fff;
+}
+
+.mode-button strong,
+.mode-button small {
+  display: block;
+}
+
+.mode-button strong {
+  font-size: 13px;
+  line-height: 1.15;
+}
+
+.mode-button small {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.mode-button.active small {
+  color: rgba(255,255,255,.65);
+}
+
+.mode-hint {
+  min-height: 18px;
+  margin: 0 2px 4px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.employee-card.multiple-selected {
+  border-color: #171717;
+  box-shadow: 0 0 0 1px #171717 inset, 0 4px 18px rgba(0,0,0,.03);
+}
+
+.batch-only {
+  min-width: 82px;
+  min-height: 52px;
+  border: 0;
+  border-radius: 14px;
+  background: #171717;
+  color: #fff;
+  padding: 0 15px;
+  font-size: 12px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.batch-only.selected {
+  background: #e8e8e5;
+  color: #171717;
+}
+
+.mode-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 23px;
+  height: 23px;
+  margin-left: 6px;
+  border-radius: 999px;
+  background: #fff;
+  color: #171717;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.mode-button:not(.active) .mode-count {
+  background: #171717;
+  color: #fff;
+}
+
+@media (max-width: 390px) {
+  .mode-button {
+    min-height: 64px;
+    padding: 9px 10px;
+  }
+
+  .mode-icon {
+    width: 34px;
+    height: 34px;
+    flex-basis: 34px;
+  }
+
+  .mode-button strong { font-size: 12px; }
+}

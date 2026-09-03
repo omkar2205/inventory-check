@@ -7,7 +7,7 @@ const CONFIG = {
 };
 
 const state = {
-  pin: '',
+  operatorName: '',
   query: '',
   filters: { brand: '', team: '', manager: '', l2Manager: '' },
   allEmployees: [],
@@ -21,7 +21,8 @@ const state = {
 const els = {
   accessGate: document.getElementById('accessGate'),
   accessForm: document.getElementById('accessForm'),
-  pinInput: document.getElementById('pinInput'),
+  operatorInput: document.getElementById('operatorInput'),
+  operatorNameLabel: document.getElementById('operatorNameLabel'),
   gateError: document.getElementById('gateError'),
   unlockButton: document.getElementById('unlockButton'),
   searchInput: document.getElementById('searchInput'),
@@ -62,6 +63,10 @@ function normalize(value = '') {
     .trim();
 }
 
+function cleanOperatorName(value = '') {
+  return String(value).replace(/\s+/g, ' ').trim().slice(0, 80);
+}
+
 function getDeviceId() {
   const key = 'inventory_device_id';
   try {
@@ -76,20 +81,20 @@ function getDeviceId() {
   }
 }
 
-function getStoredPin() {
-  try { return sessionStorage.getItem('inventory_event_pin') || ''; }
+function getStoredOperatorName() {
+  try { return sessionStorage.getItem('inventory_operator_name') || ''; }
   catch { return ''; }
 }
 
-function setStoredPin(pin) {
-  try { sessionStorage.setItem('inventory_event_pin', pin); } catch {}
+function setStoredOperatorName(name) {
+  try { sessionStorage.setItem('inventory_operator_name', name); } catch {}
 }
 
-function clearStoredPin() {
-  try { sessionStorage.removeItem('inventory_event_pin'); } catch {}
+function clearStoredOperatorName() {
+  try { sessionStorage.removeItem('inventory_operator_name'); } catch {}
 }
 
-async function apiRequest(action, body = {}, pin = state.pin) {
+async function apiRequest(action, body = {}, operatorName = state.operatorName) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), CONFIG.REQUEST_TIMEOUT_MS);
 
@@ -100,7 +105,7 @@ async function apiRequest(action, body = {}, pin = state.pin) {
         'Content-Type': 'application/json',
         'apikey': CONFIG.PUBLISHABLE_KEY,
       },
-      body: JSON.stringify({ action, pin, ...body }),
+      body: JSON.stringify({ action, operatorName, ...body }),
       signal: controller.signal,
       cache: 'no-store',
     });
@@ -125,20 +130,21 @@ function showGate(message = '') {
   els.accessGate.classList.remove('hidden');
   els.gateError.textContent = message;
   els.gateError.classList.toggle('hidden', !message);
-  setTimeout(() => els.pinInput.focus(), 80);
+  setTimeout(() => els.operatorInput.focus(), 80);
 }
 
 function hideGate() {
   document.body.classList.remove('locked');
   els.accessGate.classList.add('hidden');
   els.gateError.classList.add('hidden');
+  els.operatorNameLabel.textContent = state.operatorName || '—';
   setTimeout(() => els.searchInput.focus(), 80);
 }
 
-async function unlock(pin) {
-  const cleanPin = String(pin || '').replace(/\D/g, '').slice(0, 6);
-  if (cleanPin.length !== 6) {
-    showGate('Enter the 6-digit PIN.');
+async function startSession(name) {
+  const cleanName = cleanOperatorName(name);
+  if (cleanName.length < 2) {
+    showGate('Enter your name to continue.');
     return;
   }
 
@@ -147,24 +153,24 @@ async function unlock(pin) {
   els.gateError.classList.add('hidden');
 
   try {
-    await loadRoster(cleanPin);
-    state.pin = cleanPin;
-    setStoredPin(cleanPin);
-    els.pinInput.value = '';
+    await loadRoster(cleanName);
+    state.operatorName = cleanName;
+    setStoredOperatorName(cleanName);
+    els.operatorInput.value = '';
     hideGate();
   } catch (error) {
-    state.pin = '';
-    clearStoredPin();
-    showGate(error.code === 'INVALID_PIN' ? 'That PIN is not correct.' : error.message);
+    state.operatorName = '';
+    clearStoredOperatorName();
+    showGate(error.message || 'Could not open distribution.');
   } finally {
     els.unlockButton.disabled = false;
-    els.unlockButton.textContent = 'Open distribution';
+    els.unlockButton.textContent = 'Start serving';
   }
 }
 
-async function loadRoster(pin = state.pin, { quiet = false } = {}) {
+async function loadRoster(operatorName = state.operatorName, { quiet = false } = {}) {
   if (!quiet) showStatus('info', 'Loading employee list…');
-  const payload = await apiRequest('bootstrap', {}, pin);
+  const payload = await apiRequest('bootstrap', {}, operatorName);
   state.allEmployees = payload.employees || [];
   state.filterOptions = payload.filters || state.filterOptions;
   updateStats(payload.stats || {});
@@ -176,11 +182,10 @@ async function loadRoster(pin = state.pin, { quiet = false } = {}) {
 function bindEvents() {
   els.accessForm.addEventListener('submit', event => {
     event.preventDefault();
-    unlock(els.pinInput.value);
+    startSession(els.operatorInput.value);
   });
 
-  els.pinInput.addEventListener('input', () => {
-    els.pinInput.value = els.pinInput.value.replace(/\D/g, '').slice(0, 6);
+  els.operatorInput.addEventListener('input', () => {
     els.gateError.classList.add('hidden');
   });
 
@@ -283,11 +288,8 @@ function runSearch() {
     .map(item => item.employee);
 
   renderResults();
-  if (!state.results.length && (query || hasAnyFilter())) {
-    showStatus('error', 'No matching employee found.');
-  } else {
-    clearStatus();
-  }
+  if (!state.results.length && (query || hasAnyFilter())) showStatus('error', 'No matching employee found.');
+  else clearStatus();
 }
 
 function formatTime(value) {
@@ -476,6 +478,7 @@ async function submitGive(codes, collectorCode, { quick }) {
       employee.collectedAt = detail.collectedAt || new Date().toISOString();
       employee.collectedByCode = detail.collectedByCode || collectorCode;
       employee.collectedByName = detail.collectedByName || state.allEmployees.find(item => item.code === collectorCode)?.name || '';
+      employee.servedByName = detail.servedByName || state.operatorName;
       state.selected.delete(employee.code);
     }
 
@@ -483,7 +486,7 @@ async function submitGive(codes, collectorCode, { quick }) {
     renderSelectionTray();
 
     if (already.length) {
-      try { await loadRoster(state.pin, { quiet: true }); } catch {}
+      try { await loadRoster(state.operatorName, { quiet: true }); } catch {}
     }
 
     if (!quick) closeSheet();
@@ -508,8 +511,8 @@ async function submitGive(codes, collectorCode, { quick }) {
       setTimeout(() => els.searchInput.focus(), 60);
     }
   } catch (error) {
-    if (error.code === 'INVALID_PIN') {
-      lockSession('Session expired. Enter the event PIN again.');
+    if (error.code === 'OPERATOR_REQUIRED') {
+      lockSession('Enter your name to continue.');
     } else {
       showStatus('error', 'Could not confirm the handover. Search the employee again before retrying.');
     }
@@ -523,12 +526,16 @@ function openStatsSheet() {
   const remaining = Math.max(0, state.stats.total - state.stats.distributed);
   const pct = state.stats.total ? Math.round((state.stats.distributed / state.stats.total) * 100) : 0;
   openSheet('TODAY', 'Distribution status', `
+    <div class="operator-summary">
+      <span>Serving as</span>
+      <strong>${escapeHtml(state.operatorName)}</strong>
+    </div>
     <div class="selection-list">
       <div class="selection-item"><strong>${state.stats.distributed}</strong><span>Orders distributed</span></div>
       <div class="selection-item"><strong>${remaining}</strong><span>Still available</span></div>
       <div class="selection-item"><strong>${pct}%</strong><span>Completed</span></div>
     </div>
-    <button id="lockSessionButton" class="lock-button" type="button">Lock this device</button>
+    <button id="lockSessionButton" class="lock-button" type="button">Change staff member</button>
   `);
   document.getElementById('lockSessionButton').addEventListener('click', () => lockSession());
 }
@@ -541,11 +548,12 @@ function updateStats(payload) {
 }
 
 function lockSession(message = '') {
-  state.pin = '';
+  state.operatorName = '';
   state.allEmployees = [];
   state.results = [];
   state.selected.clear();
-  clearStoredPin();
+  clearStoredOperatorName();
+  els.operatorNameLabel.textContent = '—';
   closeSheet();
   renderSelectionTray();
   els.results.innerHTML = '';
@@ -587,19 +595,19 @@ async function bootstrap() {
   renderActiveFilters();
   document.body.classList.add('locked');
 
-  const storedPin = getStoredPin();
-  if (!storedPin) {
+  const storedOperatorName = cleanOperatorName(getStoredOperatorName());
+  if (!storedOperatorName) {
     showGate();
     return;
   }
 
   try {
-    await loadRoster(storedPin);
-    state.pin = storedPin;
+    await loadRoster(storedOperatorName);
+    state.operatorName = storedOperatorName;
     hideGate();
   } catch {
-    clearStoredPin();
-    showGate('Enter the event PIN to continue.');
+    clearStoredOperatorName();
+    showGate('Enter your name to continue.');
   }
 }
 

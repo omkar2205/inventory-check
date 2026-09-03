@@ -12,17 +12,18 @@
   <link rel="stylesheet" href="mode.css" />
   <link rel="stylesheet" href="remove-controls.css" />
   <link rel="stylesheet" href="orders.css" />
+  <link rel="stylesheet" href="operator.css" />
 </head>
 <body>
   <div id="accessGate" class="access-gate">
     <form id="accessForm" class="access-card" autocomplete="off">
       <div class="access-mark">✓</div>
-      <div class="eyebrow">EVENT DISTRIBUTION</div>
-      <h1>Ready to serve</h1>
-      <p>Enter the 6-digit event PIN on this device.</p>
-      <input id="pinInput" class="pin-input" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="one-time-code" aria-label="Event PIN" placeholder="••••••" />
+      <div class="eyebrow">COUNTER SETUP</div>
+      <h1>Who is serving?</h1>
+      <p>Enter your name. It will be saved with every handover from this device.</p>
+      <input id="operatorInput" class="pin-input operator-name-input" type="text" maxlength="80" autocomplete="name" autocapitalize="words" spellcheck="false" aria-label="Your name" placeholder="Your name" />
       <div id="gateError" class="gate-error hidden" role="alert"></div>
-      <button id="unlockButton" class="unlock-button" type="submit">Open distribution</button>
+      <button id="unlockButton" class="unlock-button" type="submit">Start serving</button>
     </form>
   </div>
 
@@ -31,6 +32,10 @@
       <div>
         <div class="eyebrow">EVENT DISTRIBUTION</div>
         <h1>Find employee</h1>
+        <div id="operatorBadge" class="operator-badge">
+          <span>Serving as</span>
+          <strong id="operatorNameLabel">—</strong>
+        </div>
       </div>
       <button id="statsPill" class="stats-pill" type="button" aria-label="Distribution statistics">
         <strong id="distributedCount">0</strong><span>/</span><span id="totalCount">0</span>

@@ -1,0 +1,64 @@
+.operator-name-input {
+  width: 100%;
+  text-align: left;
+  letter-spacing: normal;
+  font-size: 18px;
+  font-weight: 700;
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
+.operator-name-input::placeholder {
+  letter-spacing: normal;
+  font-weight: 600;
+}
+
+.operator-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  padding: 6px 9px;
+  border-radius: 999px;
+  background: #ecece8;
+  color: #65655f;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.operator-badge strong {
+  color: #171717;
+  font-size: 12px;
+}
+
+.operator-summary {
+  margin-bottom: 14px;
+  padding: 14px;
+  border-radius: 16px;
+  background: #f4f4f1;
+}
+
+.operator-summary span,
+.operator-summary strong {
+  display: block;
+}
+
+.operator-summary span {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+}
+
+.operator-summary strong {
+  margin-top: 3px;
+  font-size: 17px;
+}
+
+.served-by-line {
+  display: block;
+  margin-top: 3px;
+  color: #565650;
+  font-weight: 700;
+}
